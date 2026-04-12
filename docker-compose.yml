@@ -1,0 +1,226 @@
+version: "3.9"
+
+networks:
+  vaultex-net:
+    driver: bridge
+
+volumes:
+  mongo-data:
+  mysql-data:
+  redis-data:
+  rabbitmq-data:
+  es-data:
+
+services:
+
+  # ─── INFRASTRUCTURE ────────────────────────────────────────────
+
+  mongo:
+    image: mongo:7
+    container_name: vaultex-mongo
+    restart: always
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - vaultex-net
+    ports:
+      - "27017:27017"
+
+  mysql:
+    image: mysql:8
+    container_name: vaultex-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: vaultex_root
+      MYSQL_DATABASE: vaultex_orders
+      MYSQL_USER: vaultex
+      MYSQL_PASSWORD: vaultex_pass
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - vaultex-net
+    ports:
+      - "3306:3306"
+
+  redis:
+    image: redis:7-alpine
+    container_name: vaultex-redis
+    restart: always
+    volumes:
+      - redis-data:/data
+    networks:
+      - vaultex-net
+    ports:
+      - "6379:6379"
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: vaultex-rabbitmq
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: vaultex
+      RABBITMQ_DEFAULT_PASS: vaultex_pass
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - vaultex-net
+    ports:
+      - "5672:5672"
+      - "15672:15672"   # RabbitMQ management UI
+
+  elasticsearch:
+    image: elasticsearch:8.13.0
+    container_name: vaultex-es
+    restart: always
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    volumes:
+      - es-data:/usr/share/elasticsearch/data
+    networks:
+      - vaultex-net
+    ports:
+      - "9200:9200"
+
+  # ─── MICROSERVICES ─────────────────────────────────────────────
+
+  user-service:
+    build: ./services/user-service
+    container_name: vaultex-user
+    restart: always
+    environment:
+      PORT: 3001
+      MONGO_URI: mongodb://mongo:27017/vaultex_users
+      JWT_SECRET: vaultex_super_secret_jwt_key
+    depends_on:
+      - mongo
+    networks:
+      - vaultex-net
+    ports:
+      - "3001:3001"
+
+  seller-service:
+    build: ./services/seller-service
+    container_name: vaultex-seller
+    restart: always
+    environment:
+      PORT: 3002
+      MONGO_URI: mongodb://mongo:27017/vaultex_sellers
+      JWT_SECRET: vaultex_super_secret_jwt_key
+    depends_on:
+      - mongo
+    networks:
+      - vaultex-net
+    ports:
+      - "3002:3002"
+
+  product-service:
+    build: ./services/product-service
+    container_name: vaultex-product
+    restart: always
+    environment:
+      PORT: 8001
+      MONGO_URI: mongodb://mongo:27017/vaultex_products
+      ES_HOST: http://elasticsearch:9200
+    depends_on:
+      - mongo
+      - elasticsearch
+    networks:
+      - vaultex-net
+    ports:
+      - "8001:8001"
+
+  cart-service:
+    build: ./services/cart-service
+    container_name: vaultex-cart
+    restart: always
+    environment:
+      PORT: 3003
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - redis
+    networks:
+      - vaultex-net
+    ports:
+      - "3003:3003"
+
+  order-service:
+    build: ./services/order-service
+    container_name: vaultex-order
+    restart: always
+    environment:
+      PORT: 8002
+      DB_HOST: mysql
+      DB_USER: vaultex
+      DB_PASSWORD: vaultex_pass
+      DB_NAME: vaultex_orders
+      RABBITMQ_URL: amqp://vaultex:vaultex_pass@rabbitmq:5672
+    depends_on:
+      - mysql
+      - rabbitmq
+    networks:
+      - vaultex-net
+    ports:
+      - "8002:8002"
+
+  payment-service:
+    build: ./services/payment-service
+    container_name: vaultex-payment
+    restart: always
+    environment:
+      PORT: 3004
+      RABBITMQ_URL: amqp://vaultex:vaultex_pass@rabbitmq:5672
+    depends_on:
+      - rabbitmq
+    networks:
+      - vaultex-net
+    ports:
+      - "3004:3004"
+
+  notification-service:
+    build: ./services/notification-service
+    container_name: vaultex-notification
+    restart: always
+    environment:
+      PORT: 3005
+      RABBITMQ_URL: amqp://vaultex:vaultex_pass@rabbitmq:5672
+    depends_on:
+      - rabbitmq
+    networks:
+      - vaultex-net
+    ports:
+      - "3005:3005"
+
+  # ─── FRONTEND ──────────────────────────────────────────────────
+
+  frontend:
+    build: ./frontend
+    container_name: vaultex-frontend
+    restart: always
+    networks:
+      - vaultex-net
+    ports:
+      - "5173:80"
+
+  # ─── API GATEWAY ───────────────────────────────────────────────
+
+  gateway:
+    image: nginx:alpine
+    container_name: vaultex-gateway
+    restart: always
+    volumes:
+      - ./gateway/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - user-service
+      - seller-service
+      - product-service
+      - cart-service
+      - order-service
+      - payment-service
+      - notification-service
+      - frontend
+    networks:
+      - vaultex-net
+    ports:
+      - "80:80"

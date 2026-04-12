@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --navy:  #0A0F2C;
+  --gold:  #F5C518;
+  --white: #FFFFFF;
+  --grey:  #8892A4;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background-color: var(--navy);
+  color: var(--white);
+}
+
+h1, h2, h3 {
+  font-family: 'Playfair Display', serif;
+}
