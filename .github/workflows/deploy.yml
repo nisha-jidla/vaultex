@@ -89,14 +89,17 @@ jobs:
 
   # ─── JOB 3: Deploy to AWS EC2 ──────────────────────────────
   deploy:
-    - name: Deploy to EC2
-  run: |
-    ssh -i ~/.ssh/vaultex -o "StrictHostKeyChecking=no" ubuntu@${{ secrets.EC2_HOST }} << 'ENDSSH'
-      cd /home/ubuntu/vaultex 2>/dev/null || git clone https://github.com/nisha-jidla/vaultex.git /home/ubuntu/vaultex && cd /home/ubuntu/vaultex
-      git pull origin main
-      sudo docker-compose up -d --build
-      echo "Vaultex deployed successfully!"
-    ENDSSH
+    - - name: Deploy to EC2
+      run: |
+        ssh -i ~/.ssh/vaultex -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} << 'ENDSSH'
+          if [ ! -d /home/ubuntu/vaultex ]; then
+            git clone https://github.com/nisha-jidla/vaultex.git /home/ubuntu/vaultex
+          fi
+          cd /home/ubuntu/vaultex
+          git pull origin main
+          sudo docker-compose up -d --build
+          echo "Vaultex deployed successfully!"
+        ENDSSH
 
     steps:
       - name: Checkout code
