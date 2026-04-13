@@ -78,13 +78,13 @@ jobs:
       - name: Setup SSH key
         run: |
           mkdir -p ~/.ssh
-          printf '%s' "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/vaultex_new
-          chmod 600 ~/.ssh/vaultex
-          ssh-keyscan -t rsa -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+          printf '%s\n' "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
 
       - name: Deploy to EC2
         run: |
           ssh -o StrictHostKeyChecking=no \
-              -i ~/.ssh/vaultex_new \
+              -i ~/.ssh/deploy_key \
               ubuntu@${{ secrets.EC2_HOST }} \
-              "git config --global --add safe.directory /home/ubuntu/vaultex && cd /home/ubuntu/vaultex && git pull origin main && sudo docker-compose up -d"
+              "sudo chown -R ubuntu:ubuntu /home/ubuntu/vaultex && git config --global --add safe.directory /home/ubuntu/vaultex && cd /home/ubuntu/vaultex && git pull origin main && sudo docker-compose up -d"
