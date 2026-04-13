@@ -44,7 +44,7 @@ jobs:
       - name: Setup SSH key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_SSH_KEY }}" | base64 -d > ~/.ssh/vaultex
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/vaultex
           chmod 600 ~/.ssh/vaultex
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
