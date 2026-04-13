@@ -53,15 +53,13 @@ jobs:
 
       - name: Deploy to EC2
         run: |
-          ssh -i ~/.ssh/vaultex_deploy -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@${{ secrets.EC2_HOST }} << 'ENDSSH'
-            if [ ! -d /home/ubuntu/vaultex ]; then
-              git clone https://github.com/nisha-jidla/vaultex.git /home/ubuntu/vaultex
-            fi
-            cd /home/ubuntu/vaultex
-            git pull origin main
-            sudo docker-compose up -d --build
-            echo "Vaultex deployed successfully!"
-          ENDSSH
+          aws ssm send-command \
+            --instance-ids $(aws ec2 describe-instances \
+              --filters "Name=tag:Name,Values=vaultex-server" \
+              --query "Reservations[0].Instances[0].InstanceId" \
+              --output text) \
+            --document-name "AWS-RunShellScript" \
+            --parameters 'commands=["cd /home/ubuntu/vaultex && git pull && sudo docker-compose up -d --build"]'
 
       - name: Notify success
         run: echo "Vaultex deployed to http://${{ secrets.EC2_HOST }}"
