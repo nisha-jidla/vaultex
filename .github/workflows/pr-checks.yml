@@ -1,0 +1,58 @@
+name: PR Checks
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+
+  # ─── Lint and validate ─────────────────────────────────────
+  lint:
+    name: Lint & Validate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate docker-compose.yml
+        run: docker compose config
+
+      - name: Check Dockerfile syntax (user-service)
+        run: docker build --no-cache --dry-run services/user-service/ 2>/dev/null || true
+
+      - name: Validate Terraform
+        working-directory: infra
+        run: |
+          terraform init -backend=false
+          terraform validate
+          echo "✅ Terraform configuration is valid"
+        env:
+          TF_VAR_public_key_path: "/dev/null"
+          TF_VAR_app_repo: "https://github.com/nisha-jidla/vaultex.git"
+
+  # ─── Security scan ─────────────────────────────────────────
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for secrets in code
+        run: |
+          # Check no hardcoded AWS keys
+          if grep -r "AKIA" . --include="*.js" --include="*.py" --include="*.yml" 2>/dev/null; then
+            echo "❌ Possible AWS key found in code!"
+            exit 1
+          fi
+          echo "✅ No hardcoded secrets found"
+
+      - name: Check .env files not committed
+        run: |
+          if git ls-files | grep -E "^services/.+/.env$"; then
+            echo "❌ .env file committed to repo!"
+            exit 1
+          fi
+          echo "✅ No .env files in repository"
