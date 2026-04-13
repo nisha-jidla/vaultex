@@ -2,33 +2,74 @@ name: Vaultex CI/CD Pipeline
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 env:
   AWS_REGION: us-east-1
 
 jobs:
+
   test:
     name: Test Services
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Run tests
-        run: echo "Tests passed"
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Test User Service
+        working-directory: services/user-service
+        run: npm install
+
+      - name: Test Seller Service
+        working-directory: services/seller-service
+        run: npm install
+
+      - name: Test Cart Service
+        working-directory: services/cart-service
+        run: npm install
+
+      - name: Test Payment Service
+        working-directory: services/payment-service
+        run: npm install
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Test Product Service
+        working-directory: services/product-service
+        run: pip install -r requirements.txt
+
+      - name: Test Order Service
+        working-directory: services/order-service
+        run: pip install -r requirements.txt
 
   build:
     name: Build Docker Images
-    needs: test
     runs-on: ubuntu-latest
+    needs: test
     steps:
-      - uses: actions/checkout@v4
-      - name: Check images
-        run: docker images | grep vaultex || echo "No images yet"
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build all images
+        run: docker compose build --parallel
 
   deploy:
     name: Deploy to AWS
-    needs: build
     runs-on: ubuntu-latest
+    needs: build
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
       - name: Checkout code
@@ -41,15 +82,9 @@ jobs:
           chmod 600 ~/.ssh/vaultex
           ssh-keyscan -t rsa -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
 
-      - name: Wait for EC2 to be ready
-        run: sleep 30
-
       - name: Deploy to EC2
         run: |
-          ssh -o StrictHostKeyChecking=no  \
+          ssh -o StrictHostKeyChecking=no \
               -i ~/.ssh/vaultex \
               ubuntu@${{ secrets.EC2_HOST }} \
-              "cd /home/ubuntu/vaultex && git pull && sudo docker-compose up -d"
-
-      - name: Notify success
-        run: echo "Vaultex deployed to http://${{ secrets.EC2_HOST }}"
+              "git config --global --add safe.directory /home/ubuntu/vaultex && cd /home/ubuntu/vaultex && git pull origin main && sudo docker-compose up -d"
