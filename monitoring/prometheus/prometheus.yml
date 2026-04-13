@@ -1,0 +1,61 @@
+global:
+  scrape_interval: 15s      # Collect metrics every 15 seconds
+  evaluation_interval: 15s  # Evaluate rules every 15 seconds
+
+scrape_configs:
+
+  # Prometheus monitors itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Monitor the Docker host machine
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+
+  # Monitor all Docker containers
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+
+  # Monitor Nginx gateway
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['gateway:80']
+
+  # Monitor User Service
+  - job_name: 'user-service'
+    static_configs:
+      - targets: ['user-service:3001']
+    metrics_path: '/health'
+
+  # Monitor Seller Service
+  - job_name: 'seller-service'
+    static_configs:
+      - targets: ['seller-service:3002']
+    metrics_path: '/health'
+
+  # Monitor Cart Service
+  - job_name: 'cart-service'
+    static_configs:
+      - targets: ['cart-service:3003']
+    metrics_path: '/health'
+
+  # Monitor Payment Service
+  - job_name: 'payment-service'
+    static_configs:
+      - targets: ['payment-service:3004']
+    metrics_path: '/health'
+
+  # Monitor Product Service
+  - job_name: 'product-service'
+    static_configs:
+      - targets: ['product-service:8001']
+    metrics_path: '/health'
+
+  # Monitor Order Service
+  - job_name: 'order-service'
+    static_configs:
+      - targets: ['order-service:8002']
+    metrics_path: '/health'
