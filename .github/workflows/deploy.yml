@@ -46,11 +46,10 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/vaultex
           chmod 600 ~/.ssh/vaultex
-          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
-
+          
       - name: Deploy to EC2
         run: |
-          ssh -i ~/.ssh/vaultex ubuntu@${{ secrets.EC2_HOST }} << 'ENDSSH'
+          ssh -i ~/.ssh/vaultex -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@${{ secrets.EC2_HOST }} << 'ENDSSH'
             if [ ! -d /home/ubuntu/vaultex ]; then
               git clone https://github.com/nisha-jidla/vaultex.git /home/ubuntu/vaultex
             fi
