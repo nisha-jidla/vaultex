@@ -148,3 +148,23 @@ Terraform will provision:
 ---
 
 *Built with ❤️ — Vaultex is 100% original.*
+
+## Monitoring (Phase 11)
+
+Prometheus + Grafana monitoring stack with:
+- Prometheus metrics collection
+- Grafana dashboards
+- Node Exporter (host metrics)
+- cAdvisor (container metrics)
+
+Access:
+- Prometheus: http://localhost:9090
+- Grafana: http://localhost:3000
+
+## Kubernetes (Phase 12)
+
+All Vaultex microservices deployed to Kubernetes:
+- Minikube local cluster
+- 8 service deployments
+- Namespace isolation
+- ClusterIP + NodePort services
