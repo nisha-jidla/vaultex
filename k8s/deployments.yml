@@ -1,0 +1,272 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+  namespace: vaultex
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user-service
+  template:
+    metadata:
+      labels:
+        app: user-service
+    spec:
+      containers:
+      - name: user-service
+        image: vaultex-user-service:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8002
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-service
+  namespace: vaultex
+spec:
+  selector:
+    app: user-service
+  ports:
+  - port: 8002
+    targetPort: 8002
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product-service
+  namespace: vaultex
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: product-service
+  template:
+    metadata:
+      labels:
+        app: product-service
+    spec:
+      containers:
+      - name: product-service
+        image: vaultex-product-service:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8003
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: product-service
+  namespace: vaultex
+spec:
+  selector:
+    app: product-service
+  ports:
+  - port: 8003
+    targetPort: 8003
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service
+  namespace: vaultex
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: order-service
+  template:
+    metadata:
+      labels:
+        app: order-service
+    spec:
+      containers:
+      - name: order-service
+        image: vaultex-order-service:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8004
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-service
+  namespace: vaultex
+spec:
+  selector:
+    app: order-service
+  ports:
+  - port: 8004
+    targetPort: 8004
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cart-service
+  namespace: vaultex
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cart-service
+  template:
+    metadata:
+      labels:
+        app: cart-service
+    spec:
+      containers:
+      - name: cart-service
+        image: vaultex-cart-service:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8005
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cart-service
+  namespace: vaultex
+spec:
+  selector:
+    app: cart-service
+  ports:
+  - port: 8005
+    targetPort: 8005
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service
+  namespace: vaultex
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payment-service
+  template:
+    metadata:
+      labels:
+        app: payment-service
+    spec:
+      containers:
+      - name: payment-service
+        image: vaultex-payment-service:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8006
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment-service
+  namespace: vaultex
+spec:
+  selector:
+    app: payment-service
+  ports:
+  - port: 8006
+    targetPort: 8006
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: seller-service
+  namespace: vaultex
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: seller-service
+  template:
+    metadata:
+      labels:
+        app: seller-service
+    spec:
+      containers:
+      - name: seller-service
+        image: vaultex-seller-service:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8007
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: seller-service
+  namespace: vaultex
+spec:
+  selector:
+    app: seller-service
+  ports:
+  - port: 8007
+    targetPort: 8007
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-service
+  namespace: vaultex
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notification-service
+  template:
+    metadata:
+      labels:
+        app: notification-service
+    spec:
+      containers:
+      - name: notification-service
+        image: vaultex-notification-service:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8008
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-service
+  namespace: vaultex
+spec:
+  selector:
+    app: notification-service
+  ports:
+  - port: 8008
+    targetPort: 8008
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: vaultex
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: vaultex-frontend:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: vaultex
+spec:
+  selector:
+    app: frontend
+  ports:
+  - port: 3000
+    targetPort: 3000
+  type: NodePort
