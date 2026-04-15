@@ -1,0 +1,44 @@
+namespace: vaultex
+
+services:
+  userService:
+    name: user-service
+    image: vaultex-user-service
+    tag: latest
+    port: 8002
+    replicas: 1
+
+  productService:
+    name: product-service
+    image: vaultex-product-service
+    tag: latest
+    port: 8003
+    replicas: 1
+
+  orderService:
+    name: order-service
+    image: vaultex-order-service
+    tag: latest
+    port: 8004
+    replicas: 1
+
+  cartService:
+    name: cart-service
+    image: vaultex-cart-service
+    tag: latest
+    port: 8005
+    replicas: 1
+
+  paymentService:
+    name: payment-service
+    image: vaultex-payment-service
+    tag: latest
+    port: 8006
+    replicas: 1
+
+  frontend:
+    name: frontend
+    image: vaultex-frontend
+    tag: latest
+    port: 3000
+    replicas: 1
