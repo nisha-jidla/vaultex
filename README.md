@@ -86,10 +86,10 @@ docker-compose up --build
 - [ ] **Phase 7** — Payment Service (Simulate payment)
 - [ ] **Phase 8** — Notification Service (WebSockets)
 - [ ] **Phase 9** — Frontend (Full React UI)
-- [ ] * **Phase 10** — AWS Deployment (Terraform) ✅
-- [ ] * **Phase 11** — Prometheus + Grafana Monitoring ✅
-- [ ] * **Phase 12** — Kubernetes (Minikube) ✅
-- [ ] * **Phase 13** — Helm Charts ✅
+- [ ] * **Phase 10** — AWS Deployment (Terraform) 
+- [ ] * **Phase 11** — Prometheus + Grafana Monitoring 
+- [ ] * **Phase 12** — Kubernetes (Minikube) 
+- [ ] * **Phase 13** — Helm Charts 
 
 ---
 
