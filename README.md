@@ -168,3 +168,10 @@ All Vaultex microservices deployed to Kubernetes:
 - 8 service deployments
 - Namespace isolation
 - ClusterIP + NodePort services
+
+## Helm Charts (Phase 13)
+
+Vaultex packaged as a Helm chart for easy deployment:
+- Single command deployment: `helm install vaultex helm/vaultex -n vaultex`
+- Configurable values via values.yaml
+- Supports all microservices
